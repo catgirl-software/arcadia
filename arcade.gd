@@ -13,30 +13,37 @@ var tick_timer: Timer
 
 var rng: RandomNumberGenerator
 
-func _init():
+func _ready():
 	randomize()
 	rng = RandomNumberGenerator.new()
 	rng.randomize()
 	money = 0
 	session = session_data.new()
+	print(self.get_children()[0])
 	for x in range(6):
 		shops[x] = {}
-		for y in range(1):
-			shops[x][y] = shop.new(location.new(x, y)).empty()
+		for y in range(2):
+			shops[x][y] = get_node("shop" + str(x) + str(y))
+			shops[x][y].set_location(location.new(x, y)).empty()
+	var leftStair = shop.new().set_location(location.new("stairs", "left")).stairs()
+	add_child(leftStair)
+	var rightStair = shop.new().set_location(location.new("stairs", "right")).stairs()
+	add_child(rightStair)
 	shops["left"] = {
-		"stairs": shop.new(location.new("stairs", "left")).stairs(),
+		"stairs": leftStair,
 	}
 	shops["right"] = {
-		"stairs": shop.new(location.new("stairs", "right")).stairs(),
+		"stairs": rightStair
 	}
 
+	print(shops)
 	for x in range(6):
-		for y in range(1):
+		for y in range(2):
 			get_shop_at(location.new(x, y)).shop(random_shop(10))
 
 	new_customer(10)
 
-func _ready():
+#func _ready():
 	customer_timer = Timer.new()
 	add_child(customer_timer)
 	customer_timer.wait_time = 10.0
@@ -250,4 +257,5 @@ func right_entrance() -> location:
 	return location.new(5, 0)
 
 func get_shop_at(loc: location) -> shop:
+	print("getting shop " + str(loc.x_pos) + " " + str(loc.y_pos))
 	return shops[loc.x_pos][loc.y_pos]

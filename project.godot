@@ -10,6 +10,11 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Node",
+"class": "arcade",
+"language": "GDScript",
+"path": "res://arcade.gd"
+}, {
+"base": "Node",
 "class": "customer",
 "language": "GDScript",
 "path": "res://customer.gd"
@@ -34,7 +39,7 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://session_data.gd"
 }, {
-"base": "Node",
+"base": "Node2D",
 "class": "shop",
 "language": "GDScript",
 "path": "res://shop.gd"
@@ -50,6 +55,7 @@ _global_script_classes=[ {
 "path": "res://util.gd"
 } ]
 _global_script_class_icons={
+"arcade": "",
 "customer": "",
 "customers": "",
 "data": "",
