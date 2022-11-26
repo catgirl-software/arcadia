@@ -2,12 +2,12 @@ extends Node
 
 class_name arcade
 
-const CAMERA_X = 800*0.15
-const CAMERA_Y = 600*0.15
-const SHOP_X = 48
-const SHOP_Y = 32
+const CAMERA_X = 800
+const CAMERA_Y = 600
+const SHOP_X = 48*7
+const SHOP_Y = 32*7
 
-var session: session_data
+var customer_scene = preload("res://customer.tscn")
 
 var shops = {}
 var arcade_members = []
@@ -24,15 +24,17 @@ func _ready():
 	rng = RandomNumberGenerator.new()
 	rng.randomize()
 	money = 0
-	session = session_data.new()
 	$camera.position.x = CAMERA_X/2 - SHOP_X/2
 	$camera.position.y = (-CAMERA_Y/2) + SHOP_Y/2
+	$camera/shopdetails.text = ""
 	print(self.get_children()[0])
 	for x in range(6):
 		shops[x] = {}
 		for y in range(2):
 			shops[x][y] = get_node("shop" + str(x) + str(y))
 			shops[x][y].set_location(location.new(x, y)).empty()
+			shops[x][y].position.x = SHOP_X * x
+			shops[x][y].position.y = -SHOP_Y * y
 	var leftStair = shop.new().set_location(location.new("stairs", "left")).stairs()
 	add_child(leftStair)
 	var rightStair = shop.new().set_location(location.new("stairs", "right")).stairs()
@@ -61,7 +63,7 @@ func _ready():
 
 	tick_timer = Timer.new()
 	add_child(tick_timer)
-	tick_timer.wait_time = 1.0
+	tick_timer.wait_time = 0.5
 	_t = tick_timer.connect("timeout", self, "tick_timer_cb")
 	tick_timer.start()
 
@@ -85,6 +87,7 @@ func _input(event):
 
 	current_selection = location.new(cur_x, cur_y)
 	var cur_shop = get_shop_at(current_selection)
+	$camera/shopdetails.text = cur_shop.text()
 	$selector.position.x = cur_shop.position.x
 	$selector.position.y = cur_shop.position.y
 
@@ -102,9 +105,31 @@ func tick_timer_cb():
 	print("some time passes...")
 	var to_remove = []
 	for c in arcade_members:
+		if util.chance(0.5):
+			continue
+		var old_position = c.loc
 		var remove = process_action(c)
+		var new_position = c.loc
 		if remove != null:
 			to_remove.append(remove)
+
+		if new_position.x_pos is int and old_position.x_pos is int:
+			if new_position.x_pos > old_position.x_pos:
+				c.flip_h = false
+			elif new_position.x_pos < old_position.x_pos:
+				c.flip_h = true
+			else:
+				c.flip_h = util.pick([true, false])
+
+		if c.cur_action in [customer.Action.Moving, customer.Action.Leaving]:
+			c.z_index = rng.randi_range(2000, 4000)
+		if c.cur_action in [customer.Action.InShop, customer.Action.Browsing]:
+			c.z_index = rng.randi_range(1000, 2000)
+		var shop = get_shop_at(new_position)
+		var shop_loc = get_customer_position(shop.position.x, shop.position.y)
+		c.position.x = shop_loc[0]
+		c.position.y = shop_loc[1]
+
 	if len(to_remove):
 		var new_customer_list = []
 		for c in arcade_members:
@@ -114,12 +139,21 @@ func tick_timer_cb():
 				c.queue_free()
 		arcade_members = new_customer_list
 
+func get_customer_position(x: int, y: int):
+	y = y + 2*7
+	y = y + int(7.0*randf())
+	x = x + int(7.0*randf())
+	return [x, y]
+
 func process_action(c):
+	print(c)
+
 	match c.cur_action:
 		customer.Action.Moving:
 			if location.same(c.loc, c.destination):
 				print("customer " + str(c) + " has reached their destination!")
 				c.cur_action = customer.Action.InShop
+				c.z_index = rng.randi_range(3, 1000)
 				return
 			else:
 				if not (c.loc in c.visited_locations):
@@ -130,6 +164,7 @@ func process_action(c):
 							if util.chance(c.affinities[item]):
 								print(str(c) + " went in to browse!")
 								c.cur_action = customer.Action.Browsing
+								c.z_index = rng.randi_range(3, 1000)
 								return
 							else:
 								print(str(c) + " wasn't interested...")
@@ -149,10 +184,12 @@ func process_action(c):
 				c.money = c.money - price
 				money = money + price
 				c.cur_action = customer.Action.Moving
+				c.z_index = rng.randi_range(1000, 4000)
 				c.visited_locations.append(c.loc)
 			elif util.chance(0.6):
 				print("customer " + str(c) + " got bored of browsing...")
 				c.cur_action = customer.Action.Moving
+				c.z_index = rng.randi_range(1000, 4000)
 				c.visited_locations.append(c.loc)
 		customer.Action.InShop:
 			print("customer " + str(c) + " shopping...")
@@ -162,6 +199,7 @@ func process_action(c):
 				c.money = c.money - price
 				money = money + price
 				c.cur_action = customer.Action.Leaving
+				c.z_index = rng.randi_range(1000, 4000)
 				c.destination = util.pick([left_entrance(), right_entrance()])
 			elif util.chance(0.3):
 				print("customer " + str(c) + " left the shop without buying anything...")
@@ -173,21 +211,23 @@ func process_action(c):
 					if util.chance(0.5):
 						print(str(c) + " decided to go to " + str(shop) + " instead!")
 						c.cur_action = customer.Action.Moving
+						c.z_index = rng.randi_range(1000, 4000)
 						c.destination = shop.loc
 						return null
 					else:
 						print(str(c) + " decided not to go to " + str(shop))
 				print(str(c) + " couldn't find a good shop, leaving...")
 				c.cur_action = customer.Action.Leaving
+				c.z_index = rng.randi_range(1000, 4000)
 				c.destination = util.pick([left_entrance(), right_entrance()])
 
 	return null
 
 func random_shop(p: int) -> shop_details:
 	var details = shop_details.new()
-	details.thing_1 = session.get_shop_type()
-	details.thing_2 = session.get_shop_type()
-	details.thing_3 = session.get_shop_type()
+	details.thing_1 = data.get_shopbg_type()
+	details.thing_2 = data.get_shop_type()
+	details.thing_3 = data.get_shop_type()
 	details.price = p
 	return details
 
@@ -195,7 +235,7 @@ func new_customer(friendliness: int):
 	var n = data.name()
 	print("new customer, " + n + "!")
 	for _i in range(friendliness):
-		var desire = session.get_shop_type()
+		var desire = data.get_shop_type()
 		print(n + " is looking for " + desire)
 		var possible_destinations = get_destinations(desire)
 		if not len(possible_destinations):
@@ -203,7 +243,9 @@ func new_customer(friendliness: int):
 			continue
 		var destination = util.pick(possible_destinations)
 		var richness = rng.randi_range(5, 15)
-		var c = customer.new(
+		var c = customer_scene.instance()
+		c.init(
+			rng.randi_range(0, 90),
 			richness,
 			desire,
 			util.pick([left_entrance(), right_entrance()]),

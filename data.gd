@@ -109,5 +109,9 @@ const associated_shops = {
 	'Drinks': ['Purifiers', 'Utensils', 'Playthings', 'Food'],
 }
 
+static func get_shopbg_type():
+	return shop_types[randi() % 14]
+static func get_shop_type():
+	return util.pick(shop_types)
 static func name() -> String:
 	return util.pick(customer_names)

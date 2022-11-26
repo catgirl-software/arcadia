@@ -7,19 +7,30 @@
 [ext_resource path="res://shop.gd" type="Script" id=5]
 
 [node name="Shop" type="Node2D"]
+scale = Vector2( 7, 7 )
 script = ExtResource( 5 )
 
 [node name="Rooms" type="Sprite" parent="."]
+z_as_relative = false
 texture = ExtResource( 2 )
 hframes = 30
+frame = 14
 
 [node name="Signs" type="Sprite" parent="."]
+position = Vector2( -17.1429, -8.14286 )
+z_index = 1
+z_as_relative = false
 texture = ExtResource( 1 )
 hframes = 30
 frame = 1
 
 [node name="Empty" type="Sprite" parent="."]
+visible = false
+z_index = 2
+z_as_relative = false
 texture = ExtResource( 4 )
 
 [node name="Shopfront" type="Sprite" parent="."]
+z_index = 1000
+z_as_relative = false
 texture = ExtResource( 3 )

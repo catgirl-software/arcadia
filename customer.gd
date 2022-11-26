@@ -1,4 +1,4 @@
-extends Node
+extends Sprite
 
 class_name customer
 
@@ -17,8 +17,10 @@ var customer_name: String
 var cur_action # : Action
 var visited_locations = []
 var money: float
+var sprite: Sprite
 
-func _init(m: int, wants: String, l: location, dest: location, n: String):
+func init(f: int, m: int, wants: String, l: location, dest: location, n: String):
+	frame = f
 	money = m
 	desire = wants
 	affinities[desire] = randf()

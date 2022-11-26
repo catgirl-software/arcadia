@@ -27,8 +27,14 @@ func shop(s: shop_details) -> shop:
 	print("setting " + str(loc) + " to a shop!")
 	$Empty.visible = false
 	$Rooms.frame = data.shop_types.find(stats.thing_1)
+	$Signs.frame = data.shop_types.find(stats.thing_2)
 	shop_name = str(stats) + "@" + str(loc.x_pos) + ", " + str(loc.y_pos)
 	return self
+
+func text() -> String:
+	if $Empty.visible:
+		return "No shop."
+	return "Selling " + stats.thing_1 + ", " + stats.thing_2 + ", and " + stats.thing_3
 
 func has_item(desire: String) -> bool:
 	if not stats:
