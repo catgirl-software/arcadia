@@ -29,3 +29,4 @@ func has_item(desire: String) -> bool:
 	if not stats:
 		return false
 	return stats.thing_1 == desire || stats.thing_2 == desire || stats.thing_3 == desire
+

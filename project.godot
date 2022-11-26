@@ -29,11 +29,6 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://location.gd"
 }, {
-"base": "Node",
-"class": "person",
-"language": "GDScript",
-"path": "res://person.gd"
-}, {
 "base": "Reference",
 "class": "session_data",
 "language": "GDScript",
@@ -59,7 +54,6 @@ _global_script_class_icons={
 "customers": "",
 "data": "",
 "location": "",
-"person": "",
 "session_data": "",
 "shop": "",
 "shop_details": "",

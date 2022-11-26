@@ -13,8 +13,11 @@ var loc: location
 var destination: location
 var customer_name: String
 var cur_action # : Action
+var visited_locations = []
+var money: float
 
-func _init(wants: String, l: location, dest: location, n: String):
+func _init(m: int, wants: String, l: location, dest: location, n: String):
+	money = m
 	desire = wants
 	loc = l
 	destination = dest

@@ -4,7 +4,7 @@ var thing_1: String
 var thing_2: String
 var thing_3: String
 
-var price: int
+var price: float
 
 func _init():
 	pass

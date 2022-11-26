@@ -11,8 +11,12 @@ var money: int
 var customer_timer: Timer
 var tick_timer: Timer
 
+var rng: RandomNumberGenerator
+
 func _init():
 	randomize()
+	rng = RandomNumberGenerator.new()
+	rng.randomize()
 	money = 0
 	session = session_data.new()
 	for x in range(6):
@@ -28,14 +32,13 @@ func _init():
 	get_shop_at(loc).shop(random_shop(10))
 
 	new_customer(10)
-	print(shops)
 
 func _ready():
 	customer_timer = Timer.new()
 	add_child(customer_timer)
 	customer_timer.wait_time = 10.0
 	customer_timer.connect("timeout", self, "customer_timer_cb")
-	#customer_timer.start()
+	customer_timer.start()
 
 	tick_timer = Timer.new()
 	add_child(tick_timer)
@@ -52,25 +55,9 @@ func tick_timer_cb():
 	print("some time passes...")
 	var to_remove = []
 	for c in arcade_members:
-		match c.cur_action:
-			customer.Action.Moving:
-				c.loc = next_location(c.loc, c.destination)
-				print("customer " + str(c) + " moving to " + str(c.loc))
-				if location.same(c.loc, c.destination):
-					print("customer " + str(c) + " has reached their destination!")
-					c.cur_action = customer.Action.InShop
-			customer.Action.Leaving:
-				c.loc = next_location(c.loc, c.destination)
-				print("customer " + str(c) + " leaving, moving to " + str(c.loc))
-				if location.same(c.loc, c.destination):
-					print("customer " + str(c) + " has left the arcade...")
-					to_remove.append(c)
-			customer.Action.InShop:
-				print("customer " + str(c) + " shopping...")
-				if util.chance(0.3):
-					print("customer " + str(c) + " bought their item!")
-					c.cur_action = customer.Action.Leaving
-					c.destination = util.pick([left_entrance(), right_entrance()])
+		var remove = process_action(c)
+		if remove != null:
+			to_remove.append(remove)
 	if len(to_remove):
 		var new_customer_list = []
 		for c in arcade_members:
@@ -80,6 +67,48 @@ func tick_timer_cb():
 				c.queue_free()
 		arcade_members = new_customer_list
 
+func process_action(c):
+	match c.cur_action:
+		customer.Action.Moving:
+			c.loc = next_location(c.loc, c.destination)
+			print("customer " + str(c) + " moving to " + str(c.loc))
+			if location.same(c.loc, c.destination):
+				print("customer " + str(c) + " has reached their destination!")
+				c.cur_action = customer.Action.InShop
+		customer.Action.Leaving:
+			c.loc = next_location(c.loc, c.destination)
+			print("customer " + str(c) + " leaving, moving to " + str(c.loc))
+			if location.same(c.loc, c.destination):
+				print("customer " + str(c) + " has left the arcade...")
+				return c
+		customer.Action.InShop:
+			print("customer " + str(c) + " shopping...")
+			var price = barter(c, get_shop_at(c.loc))
+			if price:
+				print("customer " + str(c) + " bought their item for $" + str(price) + "!")
+				c.money = c.money - price
+				money = money + price
+				c.cur_action = customer.Action.Leaving
+				c.destination = util.pick([left_entrance(), right_entrance()])
+			elif util.chance(0.3):
+				print("customer " + str(c) + " left the shop without buying anything...")
+				c.visited_locations.append(c.destination)
+				for shop in get_destinations(c.desire):
+					if shop.loc in c.visited_locations:
+						print(str(c) + " isn't going to " + str(shop) + " again!")
+						continue
+					if util.chance(0.5):
+						print(str(c) + " decided to go to " + str(shop) + " instead!")
+						c.cur_action = customer.Action.Moving
+						c.destination = shop.loc
+						return null
+					else:
+						print(str(c) + " decided not to go to " + str(shop))
+				print(str(c) + " couldn't find a good shop, leaving...")
+				c.cur_action = customer.Action.Leaving
+				c.destination = util.pick([left_entrance(), right_entrance()])
+
+	return null
 
 func random_shop(p: int) -> shop_details:
 	var details = shop_details.new()
@@ -87,7 +116,6 @@ func random_shop(p: int) -> shop_details:
 	details.thing_2 = session.get_shop_type()
 	details.thing_3 = session.get_shop_type()
 	details.price = p
-	print(details)
 	return details
 
 func new_customer(friendliness: int):
@@ -96,11 +124,14 @@ func new_customer(friendliness: int):
 	for _i in range(friendliness):
 		var desire = session.get_shop_type()
 		print(n + " is looking for " + desire)
-		var destination = get_destination(desire)
-		if destination == null:
+		var possible_destinations = get_destinations(desire)
+		if not len(possible_destinations):
 			print("no shop matching " + desire + "!")
 			continue
+		var destination = util.pick(possible_destinations)
+		var richness = rng.randi_range(5, 15)
 		var c = customer.new(
+			richness,
 			desire,
 			util.pick([left_entrance(), right_entrance()]),
 			destination.loc,
@@ -112,15 +143,36 @@ func new_customer(friendliness: int):
 		return
 	print(n + " leaves in disgust...")
 
-func get_destination(desire: String) -> location:
+func barter(c: customer, s: shop) -> int:
+	var c_price = randfn_less(c.money, c.money/2)
+	var s_price = randfn_pos(s.stats.price, s.stats.price/3)
+	print(str(s) + " offers " + str(s_price) + ", " + c.customer_name + " has " + str(c_price))
+	if s_price <= c_price:
+		return s_price
+	return 0
+
+func randfn_pos(mean: float, dev: float) -> float:
+	for _i in range(10):
+		var res = rng.randfn(mean, dev)
+		if res > 0:
+			return res
+	return 0.0
+
+func randfn_less(top: float, dev: float) -> float:
+	for _i in range(20):
+		var res = rng.randfn(top, dev)
+		if res > 0 and res <= top:
+			return res
+	return 0.0
+
+
+func get_destinations(desire: String):
 	var possible_shops = []
 	for k in shops.values():
 		for shop in k.values():
 			if shop.has_item(desire):
 				possible_shops.append(shop)
-	if len(possible_shops) == 0:
-		return null
-	return util.pick(possible_shops)
+	return possible_shops
 
 func next_location(cur: location, dest: location) -> location:
 	# if we're on stairs, leave them and move towards the destination
