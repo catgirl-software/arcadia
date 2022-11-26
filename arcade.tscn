@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://arcade.gd" type="Script" id=1]
 [ext_resource path="res://shop.tscn" type="PackedScene" id=2]
 [ext_resource path="res://selector.tscn" type="PackedScene" id=3]
 [ext_resource path="res://sprites/FiraCode-Retina.ttf" type="DynamicFontData" id=4]
+[ext_resource path="res://sprites/shopfronts/frame.png" type="Texture" id=5]
 
 [sub_resource type="Theme" id=1]
 
@@ -65,3 +66,10 @@ position = Vector2( 644, -199 )
 
 [node name="selector" parent="." instance=ExtResource( 3 )]
 z_index = 4096
+
+[node name="frame" type="Sprite" parent="."]
+scale = Vector2( 7, 7 )
+z_as_relative = false
+texture = ExtResource( 5 )
+centered = false
+offset = Vector2( 0, -72 )

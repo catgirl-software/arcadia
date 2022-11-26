@@ -20,11 +20,6 @@ _global_script_classes=[ {
 "path": "res://customer.gd"
 }, {
 "base": "Reference",
-"class": "customers",
-"language": "GDScript",
-"path": "res://customers.gd"
-}, {
-"base": "Reference",
 "class": "data",
 "language": "GDScript",
 "path": "res://data.gd"
@@ -57,7 +52,6 @@ _global_script_classes=[ {
 _global_script_class_icons={
 "arcade": "",
 "customer": "",
-"customers": "",
 "data": "",
 "location": "",
 "session_data": "",
