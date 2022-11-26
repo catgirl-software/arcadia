@@ -10,20 +10,16 @@
 script = ExtResource( 5 )
 
 [node name="Rooms" type="Sprite" parent="."]
-position = Vector2( 95, 478 )
 texture = ExtResource( 2 )
 hframes = 30
 
 [node name="Signs" type="Sprite" parent="."]
-position = Vector2( 78, 470 )
 texture = ExtResource( 1 )
 hframes = 30
 frame = 1
 
 [node name="Empty" type="Sprite" parent="."]
-position = Vector2( 95, 478 )
 texture = ExtResource( 4 )
 
 [node name="Shopfront" type="Sprite" parent="."]
-position = Vector2( 95, 478 )
 texture = ExtResource( 3 )

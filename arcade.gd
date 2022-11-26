@@ -2,11 +2,17 @@ extends Node
 
 class_name arcade
 
+const CAMERA_X = 800*0.15
+const CAMERA_Y = 600*0.15
+const SHOP_X = 48
+const SHOP_Y = 32
+
 var session: session_data
 
 var shops = {}
 var arcade_members = []
 var money: int
+var current_selection: location
 
 var customer_timer: Timer
 var tick_timer: Timer
@@ -19,6 +25,8 @@ func _ready():
 	rng.randomize()
 	money = 0
 	session = session_data.new()
+	$camera.position.x = CAMERA_X/2 - SHOP_X/2
+	$camera.position.y = (-CAMERA_Y/2) + SHOP_Y/2
 	print(self.get_children()[0])
 	for x in range(6):
 		shops[x] = {}
@@ -41,6 +49,7 @@ func _ready():
 		for y in range(2):
 			get_shop_at(location.new(x, y)).shop(random_shop(10))
 
+	current_selection = $shop00.loc
 	new_customer(10)
 
 #func _ready():
@@ -55,6 +64,34 @@ func _ready():
 	tick_timer.wait_time = 1.0
 	_t = tick_timer.connect("timeout", self, "tick_timer_cb")
 	tick_timer.start()
+
+func _input(event):
+	var cur_x = current_selection.x_pos
+	var cur_y = current_selection.y_pos
+
+	if event.is_action_pressed("ui_up"):
+		cur_y = (cur_y + 1) % 2
+	elif event.is_action_pressed("ui_down"):
+		cur_y = (cur_y - 1 + 6) % 2
+	elif event.is_action_pressed("ui_left"):
+		cur_x = (cur_x - 1 + 6) % 6
+	elif event.is_action_pressed("ui_right"):
+		cur_x = (cur_x + 1) % 6
+	else:
+		return
+
+	var moved_right = cur_x > current_selection.x_pos
+	var moved_left = cur_x < current_selection.x_pos
+
+	current_selection = location.new(cur_x, cur_y)
+	var cur_shop = get_shop_at(current_selection)
+	$selector.position.x = cur_shop.position.x
+	$selector.position.y = cur_shop.position.y
+
+	if moved_right:
+		$camera.position.x = cur_shop.position.x - SHOP_X/4
+	if moved_left:
+		$camera.position.x = cur_shop.position.x + SHOP_X/4
 
 # timer callbacks
 
