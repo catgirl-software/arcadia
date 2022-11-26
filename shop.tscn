@@ -34,3 +34,4 @@ texture = ExtResource( 4 )
 z_index = 1000
 z_as_relative = false
 texture = ExtResource( 3 )
+hframes = 2
