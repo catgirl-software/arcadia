@@ -5,10 +5,12 @@ class_name customer
 enum Action {
 	Moving,
 	InShop,
+	Browsing,
 	Leaving,
 }
 
 var desire: String
+var affinities = {}
 var loc: location
 var destination: location
 var customer_name: String
@@ -19,6 +21,9 @@ var money: float
 func _init(m: int, wants: String, l: location, dest: location, n: String):
 	money = m
 	desire = wants
+	affinities[desire] = randf()
+	for related in data.associated_shops[desire]:
+		affinities[related] = randf()
 	loc = l
 	destination = dest
 	customer_name = n

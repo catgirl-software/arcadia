@@ -21,15 +21,18 @@ func _init():
 	session = session_data.new()
 	for x in range(6):
 		shops[x] = {}
-		for y in range(2):
+		for y in range(1):
 			shops[x][y] = shop.new(location.new(x, y)).empty()
-	shops["stairs"] = {
-		"left": shop.new(location.new("stairs", "left")).stairs(),
-		"right": shop.new(location.new("stairs", "right")).stairs(),
+	shops["left"] = {
+		"stairs": shop.new(location.new("stairs", "left")).stairs(),
+	}
+	shops["right"] = {
+		"stairs": shop.new(location.new("stairs", "right")).stairs(),
 	}
 
-	var loc = location.new(3, 1)
-	get_shop_at(loc).shop(random_shop(10))
+	for x in range(6):
+		for y in range(1):
+			get_shop_at(location.new(x, y)).shop(random_shop(10))
 
 	new_customer(10)
 
@@ -37,13 +40,13 @@ func _ready():
 	customer_timer = Timer.new()
 	add_child(customer_timer)
 	customer_timer.wait_time = 10.0
-	customer_timer.connect("timeout", self, "customer_timer_cb")
-	customer_timer.start()
+	var _t = customer_timer.connect("timeout", self, "customer_timer_cb")
+	#customer_timer.start()
 
 	tick_timer = Timer.new()
 	add_child(tick_timer)
 	tick_timer.wait_time = 1.0
-	tick_timer.connect("timeout", self, "tick_timer_cb")
+	_t = tick_timer.connect("timeout", self, "tick_timer_cb")
 	tick_timer.start()
 
 # timer callbacks
@@ -70,17 +73,43 @@ func tick_timer_cb():
 func process_action(c):
 	match c.cur_action:
 		customer.Action.Moving:
-			c.loc = next_location(c.loc, c.destination)
-			print("customer " + str(c) + " moving to " + str(c.loc))
 			if location.same(c.loc, c.destination):
 				print("customer " + str(c) + " has reached their destination!")
 				c.cur_action = customer.Action.InShop
-		customer.Action.Leaving:
+				return
+			else:
+				if not (c.loc in c.visited_locations):
+					var cur_shop = get_shop_at(c.loc)
+					for item in c.affinities.keys():
+						if cur_shop.has_item(item):
+							print("customer " + str(c) + " saw a " + item + " in the window...")
+							if util.chance(c.affinities[item]):
+								print(str(c) + " went in to browse!")
+								c.cur_action = customer.Action.Browsing
+								return
+							else:
+								print(str(c) + " wasn't interested...")
 			c.loc = next_location(c.loc, c.destination)
-			print("customer " + str(c) + " leaving, moving to " + str(c.loc))
+			print("customer " + str(c) + " moving to " + str(c.loc))
+		customer.Action.Leaving:
 			if location.same(c.loc, c.destination):
 				print("customer " + str(c) + " has left the arcade...")
 				return c
+			c.loc = next_location(c.loc, c.destination)
+			print("customer " + str(c) + " leaving, moving to " + str(c.loc))
+		customer.Action.Browsing:
+			print("customer " + str(c) + " browsing...")
+			var price = barter(c, get_shop_at(c.loc))
+			if price:
+				print("customer " + str(c) + " bought an item for $" + str(price) + "!")
+				c.money = c.money - price
+				money = money + price
+				c.cur_action = customer.Action.Moving
+				c.visited_locations.append(c.loc)
+			elif util.chance(0.6):
+				print("customer " + str(c) + " got bored of browsing...")
+				c.cur_action = customer.Action.Moving
+				c.visited_locations.append(c.loc)
 		customer.Action.InShop:
 			print("customer " + str(c) + " shopping...")
 			var price = barter(c, get_shop_at(c.loc))
