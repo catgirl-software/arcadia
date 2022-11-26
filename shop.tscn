@@ -14,6 +14,7 @@ script = ExtResource( 5 )
 z_as_relative = false
 texture = ExtResource( 2 )
 hframes = 30
+frame = 11
 
 [node name="Signs" type="Sprite" parent="."]
 position = Vector2( -17.1429, -8.14286 )
@@ -34,3 +35,4 @@ z_index = 1000
 z_as_relative = false
 texture = ExtResource( 3 )
 hframes = 2
+frame = 1

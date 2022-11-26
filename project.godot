@@ -14,7 +14,7 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://arcade.gd"
 }, {
-"base": "Node",
+"base": "Sprite",
 "class": "customer",
 "language": "GDScript",
 "path": "res://customer.gd"
