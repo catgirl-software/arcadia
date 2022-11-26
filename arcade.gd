@@ -35,6 +35,7 @@ func _ready():
 			shops[x][y].set_location(location.new(x, y)).empty()
 			shops[x][y].position.x = SHOP_X * x
 			shops[x][y].position.y = -SHOP_Y * y
+			shops[x][y].get_node("Shopfront").frame = y
 	var leftStair = shop.new().set_location(location.new("stairs", "left")).stairs()
 	add_child(leftStair)
 	var rightStair = shop.new().set_location(location.new("stairs", "right")).stairs()
