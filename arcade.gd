@@ -12,6 +12,8 @@ const FRAME_EDGE = 8*6
 const FRAME_Y = 80*6
 var customer_scene = preload("res://customer.tscn")
 
+var game_started = false
+
 var shops = {}
 var available_shops = []
 var cur_buy_select = -1
@@ -38,7 +40,8 @@ func _ready():
 	available_shops = [ $camera/buy0, $camera/buy1, $camera/buy2, $camera/buy3, $camera/buy4, $camera/buy5]
 	$camera.position.x = CAMERA_X/2 - SHOP_X/2
 	$camera.position.y = (-CAMERA_Y/2) + SHOP_Y/2
-	$camera/shopdetails.text = ""
+	$camera/shopdetails.bbcode_enabled = true
+	$camera/shopdetails.bbcode_text = ""
 	$frame.position.x = -SHOP_X/2
 	$frame.position.y = SHOP_Y/2
 	$stairs0.position.x = SHOP_X/2 + STAIR_X/2 + FRAME_EDGE
@@ -47,7 +50,7 @@ func _ready():
 	$stairs1.position.y = -STAIR_Y/2 + FRAME_EDGE
 	$handrail.position.x = -SHOP_X/2
 	$handrail.position.y = SHOP_Y/2
-	print(self.get_children()[0])
+
 	for x in range(6):
 		shops[x] = {}
 		for y in range(2):
@@ -82,13 +85,14 @@ func _ready():
 		for y in range(2):
 			get_shop_at(location.new(x, y)).shop(random_shop(10))
 
+
+func start_game():
+	game_started = true
 	current_selection = $shop00.loc
 	var cur_shop = get_shop_at(current_selection)
 	$selector.position.x = cur_shop.position.x
 	$selector.position.y = cur_shop.position.y
-	new_customer(10)
-
-#func _ready():
+	$camera/shopdetails.bbcode_text = "Welcome to the Adelaide Arcad[s]e[/s]ia"
 	customer_timer = Timer.new()
 	add_child(customer_timer)
 	customer_timer.wait_time = 2#10.0
@@ -122,23 +126,29 @@ func _input(event):
 	if event.is_action_pressed("buy_5"):
 		buy = 5
 	if buy != -1:
+		if not game_started:
+			start_game()
+			return
 		print("comparing " + str(buy) + " to " + str(cur_buy_select))
 		if buy == cur_buy_select:
 			var shop = available_shops[buy]
 			if shop.has_shop:
 				var sel = get_shop_at(current_selection)
 				sel.shop(shop.buy_shop())
-				$camera/shopdetails.text = "Bought " + sel.text()
+				$camera/shopdetails.bbcode_text = "Bought " + sel.text()
 			else:
-				$camera/shopdetails.text = "No shop available!"
+				$camera/shopdetails.bbcode_text = "No shop available!"
 		else:
 			available_shops[cur_buy_select].deselect()
-			$camera/shopdetails.text = "Selected: " + available_shops[buy].text()
+			$camera/shopdetails.bbcode_text = "Selected: " + available_shops[buy].text()
 			available_shops[buy].select()
 			if available_shops[buy].has_shop:
 				$camera/shopdetails.text += "\nPress " + str(buy+1) + " again to buy."
 			cur_buy_select = buy
 			print("setting cur_buy_select = " + str(cur_buy_select))
+		return
+
+	if not game_started:
 		return
 
 	var cur_x = current_selection.x_pos
@@ -167,7 +177,7 @@ func _input(event):
 
 	current_selection = location.new(cur_x, cur_y)
 	var cur_shop = get_shop_at(current_selection)
-	$camera/shopdetails.text = cur_shop.text()
+	$camera/shopdetails.bbcode_text = cur_shop.text()
 	$selector.position.x = cur_shop.position.x
 	$selector.position.y = cur_shop.position.y
 
