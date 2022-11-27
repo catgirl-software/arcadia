@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://arcade.gd" type="Script" id=1]
 [ext_resource path="res://shop.tscn" type="PackedScene" id=2]
@@ -7,6 +7,7 @@
 [ext_resource path="res://sprites/shopfronts/frame.png" type="Texture" id=5]
 [ext_resource path="res://sprites/shopfronts/stairs.png" type="Texture" id=6]
 [ext_resource path="res://shop_buy_icon.tscn" type="PackedScene" id=7]
+[ext_resource path="res://sprites/shopfronts/handrails.png" type="Texture" id=8]
 
 [sub_resource type="Theme" id=1]
 
@@ -88,18 +89,25 @@ position = Vector2( 644, -199 )
 z_index = 4096
 
 [node name="frame" type="Sprite" parent="."]
-scale = Vector2( 7, 7 )
+scale = Vector2( 6, 6 )
 z_as_relative = false
 texture = ExtResource( 5 )
 centered = false
-offset = Vector2( 0, -72 )
+offset = Vector2( 0, -80 )
 
 [node name="stairs0" type="Sprite" parent="."]
 position = Vector2( 1439, 549 )
-scale = Vector2( 7, 7 )
+scale = Vector2( 6, 6 )
 texture = ExtResource( 6 )
 
 [node name="stairs1" type="Sprite" parent="."]
 position = Vector2( 1014, 571 )
-scale = Vector2( 7, 7 )
+scale = Vector2( 6, 6 )
 texture = ExtResource( 6 )
+
+[node name="handrail" type="Sprite" parent="."]
+scale = Vector2( 6, 6 )
+z_index = 4096
+texture = ExtResource( 8 )
+centered = false
+offset = Vector2( 0, -80 )

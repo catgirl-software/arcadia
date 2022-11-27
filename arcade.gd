@@ -4,18 +4,19 @@ class_name arcade
 
 const CAMERA_X = 800
 const CAMERA_Y = 600
-const SHOP_X = 48*7
-const SHOP_Y = 32*7
-const STAIR_X = 16*7
+const SHOP_X = 48*6
+const SHOP_Y = 32*6
+const STAIR_X = 16*6
 const STAIR_Y = SHOP_Y*2
-const FRAME_EDGE = 8*7
-const FRAME_Y = 72*7
+const FRAME_EDGE = 8*6
+const FRAME_Y = 80*6
 var customer_scene = preload("res://customer.tscn")
 
 var shops = {}
 var available_shops = []
 var cur_buy_select = -1
 
+var last_move: String
 var arcade_members = []
 var money: int
 var current_selection: location
@@ -41,6 +42,8 @@ func _ready():
 	$stairs0.position.y = -STAIR_Y/2 + FRAME_EDGE
 	$stairs1.position.x = SHOP_X*4 + STAIR_X + SHOP_X/2 + STAIR_X/2 + FRAME_EDGE
 	$stairs1.position.y = -STAIR_Y/2 + FRAME_EDGE
+	$handrail.position.x = -SHOP_X/2
+	$handrail.position.y = SHOP_Y/2
 	print(self.get_children()[0])
 	for x in range(6):
 		shops[x] = {}
@@ -53,6 +56,8 @@ func _ready():
 			if x >=5:
 				shops[x][y].position.x += STAIR_X
 			shops[x][y].position.y = -SHOP_Y * y - FRAME_EDGE
+			if y >= 1:
+				shops[x][y].position.y -= FRAME_EDGE
 			shops[x][y].get_node("Shopfront").frame = y
 	var leftStair = shop.new().set_location(location.new("stairs", "left")).stairs()
 	leftStair.position.x = $stairs0.position.x
@@ -151,6 +156,8 @@ func _input(event):
 	var moved_right = cur_x > current_selection.x_pos
 	var moved_left = cur_x < current_selection.x_pos
 
+	var wrapped = abs(cur_x - current_selection.x_pos) == 5
+
 	current_selection = location.new(cur_x, cur_y)
 	var cur_shop = get_shop_at(current_selection)
 	$camera/shopdetails.text = cur_shop.text()
@@ -158,9 +165,13 @@ func _input(event):
 	$selector.position.y = cur_shop.position.y
 
 	if moved_right:
-		$camera.position.x = cur_shop.position.x - CAMERA_X/2 + SHOP_X/2 + FRAME_EDGE
+		if last_move == "right" or wrapped:
+			$camera.position.x = cur_shop.position.x - CAMERA_X/2 + SHOP_X/2 + FRAME_EDGE
+		last_move = "right"
 	if moved_left:
-		$camera.position.x = cur_shop.position.x + CAMERA_X/2 - SHOP_X/2 - FRAME_EDGE
+		if last_move == "left" or wrapped:
+			$camera.position.x = cur_shop.position.x + CAMERA_X/2 - SHOP_X/2 - FRAME_EDGE
+		last_move = "left"
 
 # timer callbacks
 

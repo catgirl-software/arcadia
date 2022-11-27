@@ -7,7 +7,7 @@
 [ext_resource path="res://shop.gd" type="Script" id=5]
 
 [node name="Shop" type="Node2D"]
-scale = Vector2( 7, 7 )
+scale = Vector2( 6, 6 )
 script = ExtResource( 5 )
 
 [node name="Rooms" type="Sprite" parent="."]
