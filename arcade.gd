@@ -7,7 +7,7 @@ const CAMERA_Y = 600
 const SHOP_X = 48*6
 const SHOP_Y = 32*6
 const STAIR_X = 16*6
-const STAIR_Y = SHOP_Y*2
+const STAIR_Y = 72*6
 const FRAME_EDGE = 8*6
 const FRAME_Y = 80*6
 var customer_scene = preload("res://customer.tscn")
@@ -15,6 +15,9 @@ var customer_scene = preload("res://customer.tscn")
 var shops = {}
 var available_shops = []
 var cur_buy_select = -1
+
+var money_ringbuf = moving_avg.new()
+var cur_avg_money: int
 
 var last_move: String
 var arcade_members = []
@@ -129,7 +132,9 @@ func _input(event):
 			else:
 				$camera/shopdetails.text = "No shop available!"
 		else:
+			available_shops[cur_buy_select].deselect()
 			$camera/shopdetails.text = "Selected: " + available_shops[buy].text()
+			available_shops[buy].select()
 			if available_shops[buy].has_shop:
 				$camera/shopdetails.text += "\nPress " + str(buy+1) + " again to buy."
 			cur_buy_select = buy
@@ -151,6 +156,8 @@ func _input(event):
 		return
 
 	print("resetting cbs")
+	if cur_buy_select != -1:
+		available_shops[cur_buy_select].deselect()
 	cur_buy_select = -1
 
 	var moved_right = cur_x > current_selection.x_pos

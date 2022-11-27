@@ -30,6 +30,11 @@ _global_script_classes=[ {
 "path": "res://location.gd"
 }, {
 "base": "Reference",
+"class": "moving_avg",
+"language": "GDScript",
+"path": "res://moving_avg.gd"
+}, {
+"base": "Reference",
 "class": "session_data",
 "language": "GDScript",
 "path": "res://session_data.gd"
@@ -59,6 +64,7 @@ _global_script_class_icons={
 "customer": "",
 "data": "",
 "location": "",
+"moving_avg": "",
 "session_data": "",
 "shop": "",
 "shop_buy_icon": "",
