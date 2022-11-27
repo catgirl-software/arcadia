@@ -109,9 +109,54 @@ const associated_shops = {
 	'Drinks': ['Purifiers', 'Utensils', 'Playthings', 'Food'],
 }
 
+const shop_names = [
+	"The Ectoplasm",
+	"The Silver Spoon",
+	"Hell's Gate",
+	"The Banished Beast",
+	"Runes and Rods",
+	"The Amazing Talisman",
+	"The Bitter Chupacabra",
+	"The Early Griffin",
+	"The Brown Fairy",
+	"The Common Elemental",
+	"la Rune",
+	"Runes Radicales",
+	"Invisibilité et Invincibilité",
+	"Envoûté",
+	"Point de Rupture",
+	"le Chaudron Vilain",
+	"le Rouleau Poilu",
+	"le Cyclope Seul",
+	"le Cupidon Câlin",
+	"la Rune Célèbre",
+	"The Bloodstone",
+	"The Holy Grail",
+	"The Sword in the Stone",
+	"The White Dove",
+	"The Revelation",
+	"The Dizzy Feathered Serpent",
+	"The Huge Angel",
+	"The Bronze Staff",
+	"The Crazy Shield",
+	"The Cheering Sphinx",
+	"The Philosopher's Stone",
+	"The Sphere",
+	"Orbs and Talismans",
+	"Bona Fide",
+	"The Red Slippers",
+	"The Scary Elf",
+	"The Flimsy Roc",
+	"The Brass Dragon",
+	"The Light Book",
+	"The Fluffy Book",
+]
+
 static func get_shopbg_type():
 	return shop_types[randi() % 14]
 static func get_shop_type():
 	return util.pick(shop_types)
 static func name() -> String:
 	return util.pick(customer_names)
+static func shop_name() -> String:
+	return util.pick(shop_names)

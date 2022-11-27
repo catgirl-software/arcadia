@@ -34,7 +34,7 @@ func shop(s: shop_details) -> shop:
 func text() -> String:
 	if $Empty.visible:
 		return "No shop."
-	return "Selling " + stats.thing_1 + ", " + stats.thing_2 + ", and " + stats.thing_3
+	return stats.text()
 
 func has_item(desire: String) -> bool:
 	if not stats:
