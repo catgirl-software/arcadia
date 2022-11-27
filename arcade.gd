@@ -40,6 +40,7 @@ func _ready():
 	available_shops = [ $camera/buy0, $camera/buy1, $camera/buy2, $camera/buy3, $camera/buy4, $camera/buy5]
 	for s in available_shops:
 		s.visible = false
+	$camera/money.visible = false
 	$camera.position.x = CAMERA_X/2 - SHOP_X/2
 	$camera.position.y = (-CAMERA_Y/2) + SHOP_Y/2
 	$camera/shopdetails.bbcode_enabled = true
@@ -82,14 +83,11 @@ func _ready():
 		"stairs": rightStair
 	}
 
-	print(shops)
-	for x in range(6):
-		for y in range(2):
-			get_shop_at(location.new(x, y)).shop(random_shop(10))
-
 
 func start_game():
 	game_started = true
+	$camera/money.visible = true
+	$camera/Title.visible = false
 	for s in available_shops:
 		s.visible = true
 	current_selection = $shop00.loc
@@ -99,13 +97,13 @@ func start_game():
 	$camera/shopdetails.bbcode_text = "Welcome to the Adelaide Arcad[s]e[/s]ia!"
 	customer_timer = Timer.new()
 	add_child(customer_timer)
-	customer_timer.wait_time = 2#10.0
+	customer_timer.wait_time = 2.0
 	var _t = customer_timer.connect("timeout", self, "customer_timer_cb")
 	customer_timer.start()
 
 	tick_timer = Timer.new()
 	add_child(tick_timer)
-	tick_timer.wait_time = 1# 0.5
+	tick_timer.wait_time = 0.5
 	_t = tick_timer.connect("timeout", self, "tick_timer_cb")
 	tick_timer.start()
 
@@ -113,7 +111,7 @@ func start_game():
 	add_child(new_shop_timer)
 	new_shop_timer.one_shot = true
 	_t = new_shop_timer.connect("timeout", self, "new_shop_timer_cb")
-	restart_new_shop_timer()
+	new_shop_timer_cb()
 
 func _input(event):
 	var buy = -1
@@ -203,7 +201,7 @@ func new_shop_timer_cb():
 	restart_new_shop_timer()
 
 func restart_new_shop_timer():
-	new_shop_timer.start(5 * randf())
+	new_shop_timer.start(100 * randf())
 
 func customer_timer_cb():
 	new_customer(3)
@@ -214,8 +212,8 @@ func tick_timer_cb():
 
 	var to_remove = []
 	for c in arcade_members:
-		#if util.chance(0.5):
-			#continue
+		if util.chance(0.5):
+			continue
 		var remove = process_action(c)
 		if remove != null:
 			to_remove.append(remove)
@@ -257,6 +255,7 @@ func tick_timer_cb():
 
 	var end_money = money
 	cur_avg_money = money_ringbuf.add(end_money - start_money)
+	$camera/money.text = "+$" + str(cur_avg_money).pad_decimals(2)
 func get_customer_position(x: int, y: int):
 	y = y + 2*7
 	y = y + int(20.0*randf())
@@ -362,7 +361,7 @@ func new_customer(friendliness: int):
 			print("no shop matching " + desire + "!")
 			continue
 		var destination = util.pick(possible_destinations)
-		var richness = rng.randi_range(5, 15)
+		var richness = rng.randi_range(500, 1500)
 		var c = customer_scene.instance()
 		c.init(
 			rng.randi_range(0, 75),
