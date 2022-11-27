@@ -196,6 +196,8 @@ func customer_timer_cb():
 
 func tick_timer_cb():
 	print("some time passes...")
+	var start_money = money
+
 	var to_remove = []
 	for c in arcade_members:
 		#if util.chance(0.5):
@@ -247,6 +249,8 @@ func tick_timer_cb():
 				c.queue_free()
 		arcade_members = new_customer_list
 
+	var end_money = money
+	cur_avg_money = money_ringbuf.add(end_money - start_money)
 func get_customer_position(x: int, y: int):
 	y = y + 2*7
 	y = y + int(20.0*randf())
