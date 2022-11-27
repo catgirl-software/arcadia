@@ -38,10 +38,12 @@ func _ready():
 	rng.randomize()
 	money = 0
 	available_shops = [ $camera/buy0, $camera/buy1, $camera/buy2, $camera/buy3, $camera/buy4, $camera/buy5]
+	for s in available_shops:
+		s.visible = false
 	$camera.position.x = CAMERA_X/2 - SHOP_X/2
 	$camera.position.y = (-CAMERA_Y/2) + SHOP_Y/2
 	$camera/shopdetails.bbcode_enabled = true
-	$camera/shopdetails.bbcode_text = ""
+	$camera/shopdetails.bbcode_text = "Arrow keys to move selection, 1-6 to buy a new shop. Press 1-6 to start."
 	$frame.position.x = -SHOP_X/2
 	$frame.position.y = SHOP_Y/2
 	$stairs0.position.x = SHOP_X/2 + STAIR_X/2 + FRAME_EDGE
@@ -88,11 +90,13 @@ func _ready():
 
 func start_game():
 	game_started = true
+	for s in available_shops:
+		s.visible = true
 	current_selection = $shop00.loc
 	var cur_shop = get_shop_at(current_selection)
 	$selector.position.x = cur_shop.position.x
 	$selector.position.y = cur_shop.position.y
-	$camera/shopdetails.bbcode_text = "Welcome to the Adelaide Arcad[s]e[/s]ia"
+	$camera/shopdetails.bbcode_text = "Welcome to the Adelaide Arcad[s]e[/s]ia!"
 	customer_timer = Timer.new()
 	add_child(customer_timer)
 	customer_timer.wait_time = 2#10.0
@@ -215,14 +219,6 @@ func tick_timer_cb():
 		var remove = process_action(c)
 		if remove != null:
 			to_remove.append(remove)
-
-#		if new_position.x_pos is int and old_position.x_pos is int:
-#			if new_position.x_pos > old_position.x_pos:
-#				c.flip_h = false
-#			elif new_position.x_pos < old_position.x_pos:
-#				c.flip_h = true
-#			else:
-#				c.flip_h = util.pick([true, false])
 
 		if c.cur_action in [customer.Action.Moving, customer.Action.Leaving]:
 			c.z_index = rng.randi_range(2000, 4000)
