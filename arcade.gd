@@ -13,7 +13,7 @@ const FRAME_Y = 80*6
 var customer_scene = preload("res://customer.tscn")
 
 var game_started = false
-
+var tick = 0
 var shops = {}
 var available_shops = []
 var cur_buy_select = -1
@@ -196,7 +196,7 @@ func _input(event):
 
 func new_shop_timer_cb():
 	print("new shop!")
-	var new_shop = random_shop(10)
+	var new_shop = random_shop(1000)
 	util.pick(available_shops).add_shop(new_shop)
 	restart_new_shop_timer()
 
@@ -254,8 +254,13 @@ func tick_timer_cb():
 		arcade_members = new_customer_list
 
 	var end_money = money
+	print("money change $" + str(end_money - start_money))
 	cur_avg_money = money_ringbuf.add(end_money - start_money)
-	$camera/money.text = "+$" + str(cur_avg_money).pad_decimals(2)
+	print("avg " + str(cur_avg_money))
+	tick += 1
+	if tick == 10:
+		tick = 0
+		$camera/money.text = "+$" + str(cur_avg_money).pad_decimals(2)
 func get_customer_position(x: int, y: int):
 	y = y + 2*7
 	y = y + int(20.0*randf())
@@ -295,7 +300,7 @@ func process_action(c):
 			c.next_location =  next_location(c.loc, c.destination)
 			print("customer " + str(c) + " leaving, moving to " + str(c.loc))
 		customer.Action.Browsing:
-			print("customer " + str(c) + " browsing...")
+			#print("customer " + str(c) + " browsing...")
 			var price = barter(c, get_shop_at(c.loc))
 			if price:
 				print("customer " + str(c) + " bought an item for $" + str(price) + "!")
@@ -310,7 +315,7 @@ func process_action(c):
 				c.z_index = rng.randi_range(1000, 4000)
 				c.visited_locations.append(c.loc)
 		customer.Action.InShop:
-			print("customer " + str(c) + " shopping...")
+			#print("customer " + str(c) + " shopping...")
 			var price = barter(c, get_shop_at(c.loc))
 			if price:
 				print("customer " + str(c) + " bought their item for $" + str(price) + "!")
@@ -352,13 +357,13 @@ func random_shop(p: int) -> shop_details:
 
 func new_customer(friendliness: int):
 	var n = data.name()
-	print("new customer, " + n + "!")
+	#print("new customer, " + n + "!")
 	for _i in range(friendliness):
 		var desire = data.get_shop_type()
-		print(n + " is looking for " + desire)
+		#print(n + " is looking for " + desire)
 		var possible_destinations = get_destinations(desire)
 		if not len(possible_destinations):
-			print("no shop matching " + desire + "!")
+			#print("no shop matching " + desire + "!")
 			continue
 		var destination = util.pick(possible_destinations)
 		var richness = rng.randi_range(500, 1500)
@@ -376,15 +381,15 @@ func new_customer(friendliness: int):
 		c.position.y = s.position.y
 		c.next_location =  next_location(c.loc, c.destination)
 		add_child(c)
-		print(n + " is buying " + desire + " from " + str(destination))
+		#print(n + " is buying " + desire + " from " + str(destination))
 		arcade_members.append(c)
 		return
-	print(n + " leaves in disgust...")
+	#print(n + " leaves in disgust...")
 
 func barter(c: customer, s: shop) -> int:
 	var c_price = randfn_less(c.money, c.money/2)
 	var s_price = randfn_pos(s.stats.price, s.stats.price/3)
-	print(str(s) + " offers " + str(s_price) + ", " + c.customer_name + " has " + str(c_price))
+	#print(str(s) + " offers " + str(s_price) + ", " + c.customer_name + " has " + str(c_price))
 	if s_price <= c_price:
 		return s_price
 	return 0
@@ -413,7 +418,7 @@ func get_destinations(desire: String):
 	return possible_shops
 
 func next_location(cur: location, dest: location) -> location:
-	print("next location for " + str(cur) + " " + str(dest))
+	#print("next location for " + str(cur) + " " + str(dest))
 	# if we're on stairs, leave them and move towards the destination
 	dest = location.new(dest.x_pos, dest.y_pos)
 	if location.same(cur, dest):
